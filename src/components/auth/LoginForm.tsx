@@ -30,8 +30,9 @@ export default function LoginForm() {
       setLoading(true);
       setError('');
       await signInWithGoogle();
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Google');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -58,18 +59,21 @@ export default function LoginForm() {
       } else {
         await signInWithEmail(formData.email, formData.password);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Authentication failed';
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password';
-      } else if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'Email is already registered';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password is too weak';
+      if (error && typeof error === 'object' && 'code' in error) {
+        const firebaseError = error as { code: string };
+        if (firebaseError.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email';
+        } else if (firebaseError.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password';
+        } else if (firebaseError.code === 'auth/email-already-in-use') {
+          errorMessage = 'Email is already registered';
+        } else if (firebaseError.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (firebaseError.code === 'auth/weak-password') {
+          errorMessage = 'Password is too weak';
+        }
       }
       setError(errorMessage);
     } finally {

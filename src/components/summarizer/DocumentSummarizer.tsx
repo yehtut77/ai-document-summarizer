@@ -85,8 +85,9 @@ export default function DocumentSummarizer() {
       }
 
       setExtractedText(result.text);
-    } catch (err: any) {
-      setError(err.message || 'Failed to process file');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process file';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -144,8 +145,9 @@ export default function DocumentSummarizer() {
           // Don't show error to user as summary still worked
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate summary');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate summary';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }

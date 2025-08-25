@@ -31,7 +31,12 @@ export async function extractTextFromPDF(file: File): Promise<PDFExtractionResul
       const textContent = await page.getTextContent();
       
       const pageText = textContent.items
-        .map((item: any) => item.str)
+        .map((item: unknown) => {
+          if (typeof item === 'object' && item !== null && 'str' in item) {
+            return (item as { str: string }).str;
+          }
+          return '';
+        })
         .join(' ');
       
       fullText += pageText + '\n';

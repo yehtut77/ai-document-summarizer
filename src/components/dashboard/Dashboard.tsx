@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Upload, Clock, Search, FileText } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Upload, Clock, FileText } from 'lucide-react';
 import DocumentSummarizer from '@/components/summarizer/DocumentSummarizer';
 import HistoryDashboard from '@/components/history/HistoryDashboard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,13 +16,7 @@ export default function Dashboard() {
   });
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchStats();
-    }
-  }, [user]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -50,7 +44,13 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchStats();
+    }
+  }, [user, fetchStats]);
 
   return (
     <div className="min-h-screen bg-gray-50">

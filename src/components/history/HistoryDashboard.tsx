@@ -22,7 +22,7 @@ interface HistoryItem {
     names: string[];
     dates: string[];
   };
-  createdAt: any;
+  createdAt: { toDate?: () => Date } | Date | string;
 }
 
 export default function HistoryDashboard() {
@@ -32,24 +32,6 @@ export default function HistoryDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      fetchHistory();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredItems(historyItems);
-    } else {
-      const filtered = historyItems.filter(item =>
-        item.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.summary.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredItems(filtered);
-    }
-  }, [searchQuery, historyItems]);
 
   const fetchHistory = async () => {
     if (!user) return;
@@ -79,6 +61,25 @@ export default function HistoryDashboard() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchHistory();
+    }
+  }, [user, fetchHistory]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredItems(historyItems);
+    } else {
+      const filtered = historyItems.filter(item =>
+        item.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.summary.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+  }, [searchQuery, historyItems]);
+
 
   const deleteItem = async (itemId: string) => {
     try {
@@ -112,9 +113,18 @@ export default function HistoryDashboard() {
     URL.revokeObjectURL(url);
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: { toDate?: () => Date } | Date | string) => {
     if (!timestamp) return 'Unknown date';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    let date: Date;
+    if (typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp && timestamp.toDate) {
+      date = timestamp.toDate();
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    } else {
+      date = new Date();
+    }
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
