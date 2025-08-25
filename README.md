@@ -169,6 +169,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Next.js team for the excellent React framework
 - Vercel for deployment platform
 
-## 📞 Support
-
-For support, email [your-email] or create an issue in this repository.
